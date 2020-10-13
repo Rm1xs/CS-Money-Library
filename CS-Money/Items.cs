@@ -122,7 +122,7 @@ namespace CS_Money
             }
             return output;
         }
-        //time converter method(not used)
+        //time converter method(used in fi)
         private static DateTime UnixTimeStampToDateTime(double unixTimeStamp)
         {
             DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
@@ -209,75 +209,75 @@ namespace CS_Money
     //csm -curently on sales
     public class CSMSkinsOnSale
     {
+        //used to check in bot item
         [JsonProperty("id")]
-        public string[] Id { get; set; }
-
+        public List<string> Id { get; set; }
+        //id to serch history
         [JsonProperty("o")]
         public long O { get; set; }
 
         [JsonProperty("g")]
         public long G { get; set; }
-
+        //price
         [JsonProperty("p")]
         public double P { get; set; }
 
         [JsonProperty("vi", NullValueHandling = NullValueHandling.Ignore)]
-        public long[] Vi { get; set; }
+        public List<long> Vi { get; set; }
 
         [JsonProperty("ai", NullValueHandling = NullValueHandling.Ignore)]
-        public string[] Ai { get; set; }
+        public List<string> Ai { get; set; }
 
         [JsonProperty("bi", NullValueHandling = NullValueHandling.Ignore)]
-        public string[] Bi { get; set; }
+        public List<string> Bi { get; set; }
 
         [JsonProperty("t", NullValueHandling = NullValueHandling.Ignore)]
-        public long[] T { get; set; }
-
+        public List<long> T { get; set; }
+        //float item
         [JsonProperty("f", NullValueHandling = NullValueHandling.Ignore)]
-        public string[] F { get; set; }
+        public List<string> F { get; set; }
 
         [JsonProperty("ss", NullValueHandling = NullValueHandling.Ignore)]
-        public Ss[] Ss { get; set; }
+        public List<Ss> Ss { get; set; }
 
         [JsonProperty("ui", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonConverter(typeof(DecodeArrayConverter))]
-        public long[] Ui { get; set; }
+        public List<long> Ui { get; set; }
 
         [JsonProperty("cp", NullValueHandling = NullValueHandling.Ignore)]
         public double? Cp { get; set; }
 
         [JsonProperty("pd", NullValueHandling = NullValueHandling.Ignore)]
         public double? Pd { get; set; }
-
+        //used in 3d view
         [JsonProperty("d", NullValueHandling = NullValueHandling.Ignore)]
-        public string[] D { get; set; }
+        public List<string> D { get; set; }
 
         [JsonProperty("b", NullValueHandling = NullValueHandling.Ignore)]
-        public string[] B { get; set; }
+        public List<string> B { get; set; }
 
         [JsonProperty("bl", NullValueHandling = NullValueHandling.Ignore)]
-        public long[] Bl { get; set; }
+        public List<long> Bl { get; set; }
 
         [JsonProperty("ar", NullValueHandling = NullValueHandling.Ignore)]
-        public ArElement[] Ar { get; set; }
+        public List<ArElement> Ar { get; set; }
 
         [JsonProperty("n", NullValueHandling = NullValueHandling.Ignore)]
-        public N[] N { get; set; }
+        public List<N> N { get; set; }
 
         [JsonProperty("s", NullValueHandling = NullValueHandling.Ignore)]
-        public Empty[][] S { get; set; }
+        public List<List<Empty>> S { get; set; }
 
         [JsonProperty("fa", NullValueHandling = NullValueHandling.Ignore)]
-        public long?[] Fa { get; set; }
+        public List<long?> Fa { get; set; }
 
         [JsonProperty("mf", NullValueHandling = NullValueHandling.Ignore)]
-        public MfElement[] Mf { get; set; }
+        public List<MfElement> Mf { get; set; }
 
         [JsonProperty("bs", NullValueHandling = NullValueHandling.Ignore)]
-        public long?[] Bs { get; set; }
+        public List<long?> Bs { get; set; }
 
         [JsonProperty("ps", NullValueHandling = NullValueHandling.Ignore)]
-        public long?[] Ps { get; set; }
+        public List<long?> Ps { get; set; }
 
         [JsonProperty("pt", NullValueHandling = NullValueHandling.Ignore)]
         public long? Pt { get; set; }
@@ -353,7 +353,7 @@ namespace CS_Money
     }
     public static class Serialize
     {
-        public static string ToJson(this Temperatures[] self) => JsonConvert.SerializeObject(self, Converter.Settings);
+        public static string ToJson(this CovertItems[] self) => JsonConvert.SerializeObject(self, Converter.Settings);
     }
     internal static class Converter
     {
