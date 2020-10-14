@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Globalization;
+using System.Linq;
 using System.Net.Http;
 using System.Runtime.Serialization.Json;
 using System.Text;
@@ -12,25 +13,79 @@ namespace CS_Money
 {
     public class Items
     {
-        const string url = "https://csm.auction/api/skins_base";
-        const string csmlib = "https://old.cs.money/730/load_bots_inventory";
+        private const string url = "https://csm.auction/api/skins_base";
+        private const string csmlib = "https://old.cs.money/730/load_bots_inventory";
+        /// <summary>
+        ///  This class gets basic information about the skin. Such as title, price, picture and ID for information on the latest sales of the item. Skin ID can be obtained through the Key property.
+        /// </summary>
         public static Dictionary<string, DeserializeItem> GetCSGOItems()
         {
-            HttpClient client = new HttpClient();
-            Encoding.GetEncoding("ISO-8859-1");
-            client.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json; charset=utf-8");
-            var data = client.GetAsync(url).Result.Content.ReadAsStringAsync().Result;
-            return JsonConvert.DeserializeObject<Dictionary<string, DeserializeItem>>(data);
+            try
+            {
+                HttpClient client = new HttpClient();
+                Encoding.GetEncoding("ISO-8859-1");
+                client.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json; charset=utf-8");
+                var data = client.GetAsync(url).Result.Content.ReadAsStringAsync().Result;
+                return JsonConvert.DeserializeObject<Dictionary<string, DeserializeItem>>(data);
+            }
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine(e.Message);
+                return null;
+            }
         }
-        public static CovertItems[] GetCSMItems()
+        /// <summary>
+        ///  This class gets detailed information about skins already on sale. Such as price, float, overpayment, stickers, number of items on the bot, skin 3d model, etc.
+        /// </summary>
+        public static CSMSkinsOnSale[] GetCSMItems()
         {
-            HttpClient client = new HttpClient();
-            Encoding.GetEncoding("ISO-8859-1");
-            client.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json; charset=utf-8");
-            var data = client.GetAsync(csmlib).Result.Content.ReadAsStringAsync().Result;
-            var output = CovertItems.FromJson(data);
-            return output;
+            try
+            {
+                HttpClient client = new HttpClient();
+                Encoding.GetEncoding("ISO-8859-1");
+                client.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json; charset=utf-8");
+                var data = client.GetAsync(csmlib).Result.Content.ReadAsStringAsync().Result;
+                var output = CovertItems.FromJson(data);
+                return output;
+            }
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine(e.Message);
+                return null;
+            }
         }
+        /// <summary>
+        ///  This class gets detailed information about the skin for the specified ID. Such as price, float, overpayment, stickers, number of items on the bot, skin 3d model, etc.
+        /// </summary>
+        public static List<CSMSkinsOnSale> GetCSMItemById(int id)
+        {
+
+            try
+            {
+                List<CSMSkinsOnSale> meny_data = new List<CSMSkinsOnSale>();
+                HttpClient client = new HttpClient();
+                Encoding.GetEncoding("ISO-8859-1");
+                client.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json; charset=utf-8");
+                var data = client.GetAsync(csmlib).Result.Content.ReadAsStringAsync().Result;
+                var output = CovertItems.FromJson(data);
+                foreach (var t in output)
+                {
+                    if (id == t.O)
+                    {
+                        meny_data.Add(new CSMSkinsOnSale { Ai = t.Ai, O = t.O, Ar = t.Ar, T = t.T, B = t.B, Bi = t.Bi, Bl = t.Bl, Bs = t.Bs, Cp = t.Cp, D = t.D, F = t.F, Fa = t.Fa, G = t.G, Id = t.Id, /*Mf = t.Mf,*/ N = t.N, P = t.P, Pd = t.Pd, Pop = t.Pop, Ps = t.Ps, Pt = t.Pt, S = t.S, Ss = t.Ss, Ui = t.Ui, Vi = t.Vi });
+                    }
+                }
+                return meny_data;
+            }
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine(e.Message);
+                return null;
+            }
+        }
+        /// <summary>
+        ///  This class gets detailed information about the entire history of the sale of a skin.
+        /// </summary>
         public static List<CSMSkinsInfo> GetSalesHistoryItem(int id)
         {
             List<CSMSkinsInfo> meny_data = new List<CSMSkinsInfo>();
@@ -55,36 +110,46 @@ namespace CS_Money
             }
             return meny_data;
         }
+        /// <summary>
+        /// This class gets information about the skin by Name of skin
+        /// </summary>
         public static SearchItem FoundItem(string name)
         {
-            SearchItem output = new SearchItem();
-            HttpClient client = new HttpClient();
-            Encoding.GetEncoding("ISO-8859-1");
-            client.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json; charset=utf-8");
-            var data = client.GetAsync(url).Result.Content.ReadAsStringAsync().Result;
-            var desitems = JsonConvert.DeserializeObject<Dictionary<string, DeserializeItem>>(data);
-            foreach (var found in desitems)
+            try
             {
-                if (name == found.Value.M)
+                SearchItem output = new SearchItem();
+                HttpClient client = new HttpClient();
+                Encoding.GetEncoding("ISO-8859-1");
+                client.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json; charset=utf-8");
+                var data = client.GetAsync(url).Result.Content.ReadAsStringAsync().Result;
+                var desitems = JsonConvert.DeserializeObject<Dictionary<string, DeserializeItem>>(data);
+                foreach (var found in desitems)
                 {
-                    var pros = 15;
-                    double num = Convert.ToDouble(found.Value.A);
-                    double procount = num / 100 * pros;
-                    double result = num + procount;
-                    double finalres = Math.Round(result, 2);
+                    if (name == found.Value.M)
+                    {
+                        var pros = 15;
+                        double num = Convert.ToDouble(found.Value.A);
+                        double procount = num / 100 * pros;
+                        double result = num + procount;
+                        double finalres = Math.Round(result, 2);
 
-                    output.CustomeId = Convert.ToInt32(found.Key);
-                    output.Name = found.Value.M;
-                    output.Price = finalres;
-                    output.Quality = found.Value.E;
+                        output.CustomeId = Convert.ToInt32(found.Key);
+                        output.Name = found.Value.M;
+                        output.Price = finalres;
+                        output.Quality = found.Value.E;
+                    }
                 }
-                else
-                {
-                    return null;
-                }
+                return output;
             }
-            return output;
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine(e.Message);
+                return null;
+            }
         }
+        /// <summary>
+        /// This class gets information about the skin by ID
+        /// </summary>
         public static SearchItem FoundItem(int id)
         {
             SearchItem output = new SearchItem();
@@ -109,10 +174,6 @@ namespace CS_Money
                         output.Name = found.Value.M;
                         output.Price = finalres;
                         output.Quality = found.Value.E;
-                    }
-                    else
-                    {
-                        return null;
                     }
                 }
             }
@@ -207,7 +268,7 @@ namespace CS_Money
         public int user_skin_id { get; set; }
     }
     //csm -curently on sales
-    public class CSMSkinsOnSale
+    public partial class CSMSkinsOnSale
     {
         //used to check in bot item
         [JsonProperty("id")]
@@ -349,7 +410,7 @@ namespace CS_Money
     }
     public partial class CovertItems
     {
-        public static CovertItems[] FromJson(string json) => JsonConvert.DeserializeObject<CovertItems[]>(json, Converter.Settings);
+        public static CSMSkinsOnSale[] FromJson(string json) => JsonConvert.DeserializeObject<CSMSkinsOnSale[]>(json, Converter.Settings);
     }
     public static class Serialize
     {
@@ -480,56 +541,59 @@ namespace CS_Money
 
         public override object ReadJson(JsonReader reader, Type t, object existingValue, JsonSerializer serializer)
         {
-            switch (reader.TokenType)
+            if (reader.Value != null)
             {
-                case JsonToken.Integer:
-                    var integerValue = serializer.Deserialize<long>(reader);
-                    return new MfElement { Integer = integerValue };
-                case JsonToken.String:
-                case JsonToken.Date:
-                    var stringValue = serializer.Deserialize<string>(reader);
-                    switch (stringValue)
-                    {
-                        case "10th Max":
-                            return new MfElement { Enum = MfEnum.The10ThMax };
-                        case "2nd Max":
-                            return new MfElement { Enum = MfEnum.The2NdMax };
-                        case "3rd Max":
-                            return new MfElement { Enum = MfEnum.The3RdMax };
-                        case "4th Max":
-                            return new MfElement { Enum = MfEnum.The4ThMax };
-                        case "5th Max":
-                            return new MfElement { Enum = MfEnum.The5ThMax };
-                        case "6th Max":
-                            return new MfElement { Enum = MfEnum.The6ThMax };
-                        case "7th Max":
-                            return new MfElement { Enum = MfEnum.The7ThMax };
-                        case "8th Max":
-                            return new MfElement { Enum = MfEnum.The8ThMax };
-                        case "Blue Dominant":
-                            return new MfElement { Enum = MfEnum.BlueDominant };
-                        case "Blue tip":
-                            return new MfElement { Enum = MfEnum.BlueTip };
-                        case "FFI":
-                            return new MfElement { Enum = MfEnum.Ffi };
-                        case "Fake Red":
-                            return new MfElement { Enum = MfEnum.FakeRed };
-                        case "Max Fake":
-                            return new MfElement { Enum = MfEnum.MaxFake };
-                        case "Not Fire and Ice":
-                            return new MfElement { Enum = MfEnum.NotFireAndIce };
-                        case "Piss Ice":
-                            return new MfElement { Enum = MfEnum.PissIce };
-                        case "Red Tip":
-                            return new MfElement { Enum = MfEnum.RedTip };
-                        case "Tricolor":
-                            return new MfElement { Enum = MfEnum.Tricolor };
-                        case "Yellow tip":
-                            return new MfElement { Enum = MfEnum.YellowTip };
-                    }
-                    break;
+                switch (reader.TokenType)
+                {
+                    case JsonToken.Integer:
+                        var integerValue = serializer.Deserialize<long>(reader);
+                        return new MfElement { Integer = integerValue };
+                    case JsonToken.String:
+                    case JsonToken.Date:
+                        var stringValue = serializer.Deserialize<string>(reader);
+                        switch (stringValue)
+                        {
+                            case "10th Max":
+                                return new MfElement { Enum = MfEnum.The10ThMax };
+                            case "2nd Max":
+                                return new MfElement { Enum = MfEnum.The2NdMax };
+                            case "3rd Max":
+                                return new MfElement { Enum = MfEnum.The3RdMax };
+                            case "4th Max":
+                                return new MfElement { Enum = MfEnum.The4ThMax };
+                            case "5th Max":
+                                return new MfElement { Enum = MfEnum.The5ThMax };
+                            case "6th Max":
+                                return new MfElement { Enum = MfEnum.The6ThMax };
+                            case "7th Max":
+                                return new MfElement { Enum = MfEnum.The7ThMax };
+                            case "8th Max":
+                                return new MfElement { Enum = MfEnum.The8ThMax };
+                            case "Blue Dominant":
+                                return new MfElement { Enum = MfEnum.BlueDominant };
+                            case "Blue tip":
+                                return new MfElement { Enum = MfEnum.BlueTip };
+                            case "FFI":
+                                return new MfElement { Enum = MfEnum.Ffi };
+                            case "Fake Red":
+                                return new MfElement { Enum = MfEnum.FakeRed };
+                            case "Max Fake":
+                                return new MfElement { Enum = MfEnum.MaxFake };
+                            case "Not Fire and Ice":
+                                return new MfElement { Enum = MfEnum.NotFireAndIce };
+                            case "Piss Ice":
+                                return new MfElement { Enum = MfEnum.PissIce };
+                            case "Red Tip":
+                                return new MfElement { Enum = MfEnum.RedTip };
+                            case "Tricolor":
+                                return new MfElement { Enum = MfEnum.Tricolor };
+                            case "Yellow tip":
+                                return new MfElement { Enum = MfEnum.YellowTip };
+                        }
+                        break;
+                }
             }
-            throw new Exception("Cannot unmarshal type MfElement");
+            return new MfElement { };
         }
 
         public override void WriteJson(JsonWriter writer, object untypedValue, JsonSerializer serializer)
